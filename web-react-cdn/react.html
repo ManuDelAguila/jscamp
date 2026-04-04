@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <title>DevJobs - Empleos</title>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Listado con empleos y filtros para encontrar el trabajo de tus sueños." />
+
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="module">
+        import React from "https://esm.sh/react?dev";
+        import ReactDOM from "https://esm.sh/react-dom/client?dev";
+
+        window.React = React;
+        window.ReactDOM = ReactDOM;
+    </script>
+    <script type="module" src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+        function JobCard({ data, titulo, empresa, ubicacion, descripcion }) {
+            const [isApplied, setIsApplied] = React.useState(false)
+
+            function handleClick() {
+                setIsApplied(!isApplied)
+            }
+
+            const buttonText = isApplied ? "Aplicado" : "Aplicar"
+            const buttonClass = isApplied ? 'is-applied' : ''
+            const isAppliedText = isApplied ? 'Sí' : 'No'
+
+            return (
+                <article 
+                  className="job-listing-card"
+                  data-modalidad={data?.modalidad}
+                  data-nivel={data?.nivel}
+                  data-technology={data?.technology}
+                >
+                    <div>
+                        <h3>{titulo}</h3>
+                        <small>{empresa} | {ubicacion} - ¿He aplicado? {isAppliedText}</small>
+                        <p>{descripcion}</p>
+                    </div>
+                    <button 
+                      className={`button-apply-job ${buttonClass}`}
+                      onClick={handleClick}
+                    >
+                        {buttonText}
+                    </button>
+                </article>
+            );
+        }
+
+        function App() {
+            return (
+                <div className="jobs-listings">
+                    <JobCard
+                        titulo="Desarrollador/a Frontend React.js"
+                        empresa="Tech Solutions"
+                        ubicacion="Remoto"
+                        descripcion="Únete a nuestro equipo como desarrollador/a frontend especializado en React.js. Trabaja en proyectos innovadores y colabora con un equipo dinámico."
+                        data={{modalidad: "remoto", nivel: "junior", technology: "react"}}
+                    />
+                </div>
+            );
+        }
+
+        const rootEl = document.querySelector("#root");
+        const root = ReactDOM.createRoot(rootEl);
+
+        root.render(<App />);
+    </script>
+</head>
+
+<body>
+    <header>
+        <h1>
+            <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+            </svg>
+            DevJobs
+        </h1>
+        <nav>
+            <a href="#">Empleos</a>
+        </nav>
+        <div>
+             <devjobs-avatar username="ManuDelAguila" size="32"></devjobs-avatar>
+        </div>
+    </header>
+    <main>
+        <section class="jobs-search">
+            <h1>React.js, primeros pasos</h1>
+        </section>
+        <section>
+            <h2>Empleos disponibles</h2>
+            <div id="root">
+                <!-- Aquí se renderizará el contenido de React -->
+            </div>
+        </section>        
+    </main>
+    <footer>
+        <small>&copy; 2026 DevJobs. Todos los derechos reservados.</small>
+    </footer>
+</body>
+
+</html>
