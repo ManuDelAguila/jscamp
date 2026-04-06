@@ -1,23 +1,23 @@
 import { JobCard } from "./JobCard"
 
-export function JobListings() {
+export function JobListings({jobs}) {
     return (
         <>
 
             <h2>Resultados de búsqueda</h2>
 
             <div className="jobs-listings">
-                <JobCard
-                    data={{
-                        modalidad: 'remoto',
-                        nivel: 'junior',
-                        technology: 'react'
-                    }}
-                    titulo="Desarrollador Frontend Junior"
-                    empresa="Tech Solutions"
-                    ubicacion="Remoto"
-                    descripcion="Únete a nuestro equipo como desarrollador frontend junior y trabaja en proyectos innovadores utilizando React."
-                />
+
+                {jobs.map((job) => (
+                    <JobCard 
+                        key={job.id}
+                        data={job.data}
+                        titulo={job.titulo}
+                        empresa={job.empresa}
+                        ubicacion={job.ubicacion}
+                        descripcion={job.descripcion}
+                    />
+                ))}
             </div>
         </>
     )

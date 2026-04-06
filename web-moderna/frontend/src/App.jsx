@@ -1,20 +1,24 @@
 import { Footer } from "./components/Footer.jsx"
 import { Header } from "./components/Header.jsx"
-import { Pagination } from "./components/Pagination.jsx"
-import { SearchFormSection } from "./components/SearchFormSection.jsx"
-import { JobListings } from "./components/JobListings.jsx"
+
+import { HomePage } from "./pages/Home.jsx"
+import { SearchPage } from "./pages/Search.jsx"
+import { NotFoundPage } from "./pages/404.jsx"
 
 function App() {
+  const currentPath = window.location.pathname
+
+  let page = <NotFoundPage />
+  if (currentPath === "/") {
+    page = <HomePage />
+  } else if (currentPath === "/search") {
+    page = <SearchPage />
+  }
+
   return (
     <>
     <Header />
-    <main>
-        <SearchFormSection />
-        <section>
-            <JobListings />
-            <Pagination totalPages={8} />
-        </section>
-    </main>
+    {page}
     <Footer />
     </>
   )
