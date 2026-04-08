@@ -7,7 +7,7 @@ import jobsData from "../data.json"
 
 const RESULTS_PER_PAGE = 4
 
-export function SearchPage() {
+const useFilters = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [textToFilter, setTextToFilter] = useState("")
   const [filters, setFilters] = useState({
@@ -40,7 +40,6 @@ export function SearchPage() {
   )
 
   const handlePageChange = (page) => {
-    console.log('Página seleccionada:', page)
     setCurrentPage(page)
   }
 
@@ -53,10 +52,23 @@ export function SearchPage() {
     setTextToFilter(newTextToFilter)
     setCurrentPage(1) // Reiniciar a la primera página al cambiar el texto del filtro
   }
+  return {
+    currentPage,
+    totalPages,
+    pageResults,
+    jobssWithTextFilter,
+    handlePageChange,
+    handleSearch,
+    handleTextFilter
+  }
+}
+
+export function SearchPage() {
+  const { currentPage, totalPages, pageResults, jobssWithTextFilter,handlePageChange, handleSearch, handleTextFilter } = useFilters()
 
   useEffect(() => {
-    console.log("render")
-  }, [])
+    document.title = `Resultados: ${jobssWithTextFilter.length}, Página ${currentPage} - DevJobs`
+  }, [jobssWithTextFilter, currentPage])
 
   return (
     <main>
