@@ -1,11 +1,15 @@
 import { useId } from "react"
 import { useState } from "react"
 
-const useSearchForm = ({ idTechnology, idLocation, idExperienceLevel, onSearch, onTextFilter }) => {
+let timeoutId = null
+const useSearchForm = ({ idTechnology, idLocation, idExperienceLevel, idText, onSearch, onTextFilter }) => {
     const [searchText, setSearchText] = useState("")
 
     const handleSubmit = (event) => {  
         event.preventDefault()
+
+        if(event.target.name === idText) return // Si el cambio viene del input de texto, no hacemos nada aquí, lo manejamos en handleTextChange
+
         const formData = new FormData(event.currentTarget)
         const filters = {
             technology: formData.get(idTechnology),
@@ -18,8 +22,13 @@ const useSearchForm = ({ idTechnology, idLocation, idExperienceLevel, onSearch, 
 
     const handleTextChange = (event) => {
         const text = event.target.value
-        setSearchText(text)
-        onTextFilter(text)
+        setSearchText(text) // actualizamos el estado local para reflejar el texto ingresado
+
+        //Debounce para evitar hacer demasiadas llamadas a onTextFilter mientras el usuario escribe
+        if(timeoutId) clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => {
+            onTextFilter(text)
+        }, 500) // Esperamos 500ms después de que el usuario deje de escribir para llamar a onTextFilter
     }
 
     return {
@@ -36,7 +45,7 @@ export function SearchFormSection({ onSearch, onTextFilter }) {
     const idLocation = useId()
     const idExperienceLevel = useId()
 
-    const { searchText, handleSubmit, handleTextChange } = useSearchForm({ idTechnology, idLocation, idExperienceLevel, onSearch, onTextFilter })
+    const { searchText, handleSubmit, handleTextChange } = useSearchForm({ idTechnology, idLocation, idExperienceLevel, idText, onSearch, onTextFilter })
     
 
     return (

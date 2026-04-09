@@ -90,6 +90,7 @@ export function SearchPage() {
     <main>
         <SearchFormSection onSearch={handleSearch} onTextFilter={handleTextFilter} />
         <section>
+            <h2 style={{ textAlign: 'center' }}>Resultados de búsqueda</h2>
             {
               loading ? <p>Cargando empleos...</p> : <JobListings jobs={jobs} />
             }
