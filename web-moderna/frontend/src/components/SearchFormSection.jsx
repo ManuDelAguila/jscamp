@@ -1,9 +1,9 @@
-import { useId } from "react"
-import { useState } from "react"
+import { useId, useState, useRef } from "react"
 
-let timeoutId = null
+
 const useSearchForm = ({ idTechnology, idLocation, idExperienceLevel, idText, onSearch, onTextFilter }) => {
     const [searchText, setSearchText] = useState("")
+    const timeoutId = useRef(null) //El useRef mantiene el mismo valor entre renders, no causa re-renderizados al cambiar su valor. Para acceder al valor se usa timeoutId.current
 
     const handleSubmit = (event) => {  
         event.preventDefault()
@@ -25,8 +25,8 @@ const useSearchForm = ({ idTechnology, idLocation, idExperienceLevel, idText, on
         setSearchText(text) // actualizamos el estado local para reflejar el texto ingresado
 
         //Debounce para evitar hacer demasiadas llamadas a onTextFilter mientras el usuario escribe
-        if(timeoutId) clearTimeout(timeoutId)
-        timeoutId = setTimeout(() => {
+        if(timeoutId.current) clearTimeout(timeoutId.current)
+        timeoutId.current = setTimeout(() => {
             onTextFilter(text)
         }, 500) // Esperamos 500ms después de que el usuario deje de escribir para llamar a onTextFilter
     }
@@ -44,9 +44,16 @@ export function SearchFormSection({ onSearch, onTextFilter }) {
     const idTechnology = useId()
     const idLocation = useId()
     const idExperienceLevel = useId()
+    const inputRef = useRef()
 
     const { searchText, handleSubmit, handleTextChange } = useSearchForm({ idTechnology, idLocation, idExperienceLevel, idText, onSearch, onTextFilter })
     
+    const handleClearInput = (event) => {
+        event.preventDefault()
+
+        inputRef.current.value = ""
+        onTextFilter("")
+    }
 
     return (
         <section className="jobs-search">
@@ -63,13 +70,19 @@ export function SearchFormSection({ onSearch, onTextFilter }) {
                         <path d="M21 21l-6 -6" />
                     </svg>
 
-                    <input name={idText} 
+                    <input 
+                      ref={inputRef}
+                      name={idText} 
                       id="empleos-search-input"
                       required
                       type="text"
                       placeholder="Buscar trabajos, empresas o habilidades"
                       onChange={handleTextChange}
                     />
+
+                    <button onClick={handleClearInput}>
+                    ✖︎
+                    </button>
                 </div>
 
                 <div className="search-filters">
