@@ -1,24 +1,37 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { Pagination } from "../components/Pagination.jsx"
 import { SearchFormSection } from "../components/SearchFormSection.jsx"
 import { JobListings } from "../components/JobListings.jsx"
+import { useRouter } from "../hooks/useRouter"
 
 const RESULTS_PER_PAGE = 4
 const API_URL = "https://jscamp-api.vercel.app/api/jobs"
 
 const useFilters = () => {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [textToFilter, setTextToFilter] = useState("")
-  const [filters, setFilters] = useState({
-    technology: "",
-    location: "",
-    experienceLevel: ""
+  const [currentPage, setCurrentPage] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const page = (urlParams.get("page")) ? Number(urlParams.get("page")) : 1
+    return Number.isNaN(page) ? 1 : page
+  })
+  const [textToFilter, setTextToFilter] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    return urlParams.get("text") || ""
+  })
+  const [filters, setFilters] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    return {
+      technology: urlParams.get("technology") || "",
+      location: urlParams.get("type") || "",
+      experienceLevel: urlParams.get("level") || ""
+    }
   })
 
   const [jobs, setJobs] = useState([])
   const [total, setTotal] = useState(0)
   const [totalPages, setTotalPages] = useState(1)
   const [loading, setLoading] = useState(false)
+  
+  const { navigateTo } = useRouter()
 
   useEffect(() => {
     async function fetchJobs() {
@@ -52,7 +65,19 @@ const useFilters = () => {
     }
 
     fetchJobs()
-  }, [textToFilter, currentPage, filters])
+  }, [filters, currentPage, textToFilter])
+
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if(textToFilter) params.append("text", textToFilter)
+    if(filters.technology) params.append("technology", filters.technology)
+    if(filters.location) params.append("type", filters.location)
+    if(filters.experienceLevel) params.append("level", filters.experienceLevel)
+    if(currentPage > 1) params.append("page", currentPage)
+
+    const newUrl = params.toString() ? `${window.location.pathname}?${params.toString()}` : window.location.pathname
+    navigateTo(newUrl)
+  }, [filters, currentPage, textToFilter, navigateTo])
 
   const handlePageChange = (page) => {
     setCurrentPage(page)
@@ -73,6 +98,7 @@ const useFilters = () => {
     loading,
     totalPages,
     currentPage,
+    textToFilter,
     handlePageChange,
     handleSearch,
     handleTextFilter
@@ -80,7 +106,7 @@ const useFilters = () => {
 }
 
 export function SearchPage() {
-  const { jobs, total, loading, totalPages, currentPage, handlePageChange, handleSearch, handleTextFilter } = useFilters()
+  const { jobs, total, loading, totalPages, currentPage, textToFilter,handlePageChange, handleSearch, handleTextFilter } = useFilters()
 
   useEffect(() => {
     document.title = `Resultados: ${total}, Página ${currentPage} - DevJobs`
@@ -88,7 +114,7 @@ export function SearchPage() {
 
   return (
     <main>
-        <SearchFormSection onSearch={handleSearch} onTextFilter={handleTextFilter} />
+        <SearchFormSection initialText={textToFilter} onSearch={handleSearch} onTextFilter={handleTextFilter} />
         <section>
             <h2 style={{ textAlign: 'center' }}>Resultados de búsqueda</h2>
             {
