@@ -106,7 +106,7 @@ const useFilters = () => {
   }
 }
 
-export function SearchPage() {
+export default function SearchPage() {
   const { jobs, total, loading, totalPages, currentPage, textToFilter,handlePageChange, handleSearch, handleTextFilter } = useFilters()
 
   useEffect(() => {
