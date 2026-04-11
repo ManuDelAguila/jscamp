@@ -12,14 +12,7 @@ export function JobListings({jobs}) {
                 }
 
                 {jobs.map((job) => (
-                    <JobCard 
-                        key={job.id}
-                        data={job.data}
-                        titulo={job.titulo}
-                        empresa={job.empresa}
-                        ubicacion={job.ubicacion}
-                        descripcion={job.descripcion}
-                    />
+                    <JobCard job={job} key={job.id} />
                 ))}
             </div>
         </>

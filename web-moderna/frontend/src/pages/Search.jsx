@@ -1,28 +1,28 @@
-import { useState, useEffect, use } from "react"
+import { useState, useEffect } from "react"
 import { Pagination } from "../components/Pagination.jsx"
 import { SearchFormSection } from "../components/SearchFormSection.jsx"
 import { JobListings } from "../components/JobListings.jsx"
 import { useRouter } from "../hooks/useRouter"
+import { useSearchParams } from "react-router"
 
 const RESULTS_PER_PAGE = 4
 const API_URL = "https://jscamp-api.vercel.app/api/jobs"
 
 const useFilters = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
+
   const [currentPage, setCurrentPage] = useState(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const page = (urlParams.get("page")) ? Number(urlParams.get("page")) : 1
+    const page = (searchParams.get("page")) ? Number(searchParams.get("page")) : 1
     return Number.isNaN(page) ? 1 : page
   })
   const [textToFilter, setTextToFilter] = useState(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    return urlParams.get("text") || ""
+    return searchParams.get("text") || ""
   })
   const [filters, setFilters] = useState(() => {
-    const urlParams = new URLSearchParams(window.location.search)
     return {
-      technology: urlParams.get("technology") || "",
-      location: urlParams.get("type") || "",
-      experienceLevel: urlParams.get("level") || ""
+      technology: searchParams.get("technology") || "",
+      location: searchParams.get("type") || "",
+      experienceLevel: searchParams.get("level") || ""
     }
   })
 
@@ -68,16 +68,17 @@ const useFilters = () => {
   }, [filters, currentPage, textToFilter])
 
   useEffect(() => {
-    const params = new URLSearchParams()
-    if(textToFilter) params.append("text", textToFilter)
-    if(filters.technology) params.append("technology", filters.technology)
-    if(filters.location) params.append("type", filters.location)
-    if(filters.experienceLevel) params.append("level", filters.experienceLevel)
-    if(currentPage > 1) params.append("page", currentPage)
+    setSearchParams(() => {      
+      const params = new URLSearchParams()
 
-    const newUrl = params.toString() ? `${window.location.pathname}?${params.toString()}` : window.location.pathname
-    navigateTo(newUrl)
-  }, [filters, currentPage, textToFilter, navigateTo])
+      if(textToFilter) params.set("text", textToFilter)
+      if(filters.technology) params.set("technology", filters.technology)
+      if(filters.location) params.set("type", filters.location)
+      if(filters.experienceLevel) params.set("level", filters.experienceLevel)
+      if(currentPage > 1) params.set("page", currentPage)
+      return params
+    })
+  }, [filters, currentPage, textToFilter, setSearchParams])
 
   const handlePageChange = (page) => {
     setCurrentPage(page)
