@@ -1,6 +1,6 @@
 import { create } from "zustand"
 
-export const useFavoritesStore = create((set, get) => ({
+export const useFavoritesStore = create((set, get, store) => ({
     //Estado
     favorites: [],
 
@@ -29,5 +29,9 @@ export const useFavoritesStore = create((set, get) => ({
         isFav ? removeFavorite(jobId) : addFavorite(jobId)
     },
 
-    countFavorites: () => get().favorites.length
+    countFavorites: () => get().favorites.length,
+
+    clearFavorites: () => {
+        set(store.getInitialState())
+    }
 }))

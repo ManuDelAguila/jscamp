@@ -4,6 +4,7 @@ import styles from './Detail.module.css'
 import { Link } from "../components/Link"
 import snarkdown from 'snarkdown'
 import { useAuthStore } from "../store/authStore"
+import { useFavoritesStore } from "../store/favoritesStore"
 
 const API_URL = "https://jscamp-api.vercel.app/api/jobs"
 
@@ -57,6 +58,7 @@ function DetailPageHeader ({ job }) {
       </header>
 
       <DetailApplyButton />
+      <DetailFavoriteButton jobId={job.id} />
     </>
   )
 }
@@ -70,7 +72,18 @@ function DetailApplyButton () {
     )
 }
 
+function DetailFavoriteButton ({ jobId }) {
+  const { isFavorite, toggleFavorite } = useFavoritesStore()
 
+  return (
+    <button
+      onClick={() => toggleFavorite(jobId)}
+      aria-label={isFavorite(jobId) ? 'Remove from favorites' : 'Add to favorites'}
+    >
+      {isFavorite(jobId) ? '❤️' : '🤍'}
+    </button>
+  )
+}
 
 export default function JobDetail() {
     const { jobId } = useParams()
