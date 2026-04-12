@@ -11,6 +11,7 @@ const JobDetail = lazy(() => import("./pages/Detail.jsx"))
 
 
 function App() {
+  
 
   return (
     <>
