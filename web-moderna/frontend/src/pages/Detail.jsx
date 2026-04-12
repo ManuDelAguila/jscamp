@@ -1,9 +1,9 @@
-import { useEffect, useState, useContext } from "react"
+import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router"
 import styles from './Detail.module.css'
 import { Link } from "../components/Link"
 import snarkdown from 'snarkdown'
-import { AuthContext } from "../context/AuthContext.jsx"
+import { useAuth } from "../context/AuthContext"
 
 const API_URL = "https://jscamp-api.vercel.app/api/jobs"
 
@@ -62,7 +62,7 @@ function DetailPageHeader ({ job }) {
 }
 
 function DetailApplyButton () {
-    const { isLoggedIn } = useContext(AuthContext)
+    const { isLoggedIn } = useAuth()
     return (
       <button disabled={!isLoggedIn} className={styles.applyButton}>
           {isLoggedIn ? "Aplicar ahora" : "Inicia sesión para aplicar"}

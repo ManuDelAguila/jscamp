@@ -9,7 +9,6 @@ export default function HomePage() {
         const searchTerm = formData.get("search")
         
         const url = searchTerm  ? `/search?text=${encodeURIComponent(searchTerm)}` : "/search"
-        console.log("Navegando a:", url)
         navigateTo(url)
     }
 
