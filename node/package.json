@@ -1,0 +1,9 @@
+{
+    "name": "ejemplos-de-node",
+    "type": "module",
+    "main": "index.js",
+    "author": "manu",
+    "dependencies": {
+        "ms": "^2.1.3"
+    }
+}
