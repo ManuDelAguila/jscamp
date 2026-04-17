@@ -54,6 +54,12 @@ const server = createServer(async (req, res) => {
         if(pathname === "/health") {
             return sendJson(res, 200, {status: "ok", uptime: process.uptime()})
         }
+        if (pathname === '/cookies') {
+          // setear la cookie desde el backend para el cliente
+          res.setHeader('Set-Cookie', 'token=abc123; HttpOnly; Path=/; Max-Age=3600')
+
+          return res.end('Cookies set')
+        }
         if(pathname === "/users") {
             const limit = Number(searchParams.get('limit')) || users.length
             const offset = Number(searchParams.get('offset')) || 0
