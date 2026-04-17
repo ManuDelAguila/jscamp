@@ -4,6 +4,6 @@
     "main": "index.js",
     "author": "manu",
     "dependencies": {
-        "ms": "^2.1.3"
+        "ms": "2.1.3"
     }
 }
