@@ -1,0 +1,10 @@
+export const DEFAULTS = {
+    PORT: 1234,
+    LIMIT_PAGINATION: 10,
+    OFFSET_PAGINATION: 0
+}
+
+export const ACCEPTED_ORIGINS = [
+    "http://localhost:5173",
+    //Puede ser un lisatdo
+]

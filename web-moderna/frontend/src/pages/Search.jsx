@@ -6,7 +6,8 @@ import { useRouter } from "../hooks/useRouter"
 import { useSearchParams } from "react-router"
 
 const RESULTS_PER_PAGE = 4
-const API_URL = "https://jscamp-api.vercel.app/api/jobs"
+//const API_URL = "https://jscamp-api.vercel.app/api/jobs"
+const API_URL = "http://localhost:1234/jobs"
 
 const useFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams()

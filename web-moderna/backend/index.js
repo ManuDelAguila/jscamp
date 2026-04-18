@@ -1,29 +1,33 @@
 import express from "express"
+import cors from "cors"
+import jobs from "./jobs.json" with { type: "json" }
+import { DEFAULTS, ACCEPTED_ORIGINS } from "./config.js"
 
-const PORT = process.env.PORT ?? 1234
+const PORT = process.env.PORT ?? DEFAULTS.PORT
 const app = express()
 
- const jobs = [
-    {id: 1, title: "Frontend"},
-    {id: 2, title: "Backend"},
-    {id: 3, title: "Fullstack"}
-]
 
-//esto es un middelware que se ejecuta primero siempre, se puede usar para controlar acceso... si quieres q continue con el proceso se llama a next()
+//Middleware de expres para parsear el body cuando llega en formato json
+app.use(express.json())
+
+//Con estao aceptaria todos los origenes, pero seremos mas selectivos
+// app.use(cors())
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if(ACCEPTED_ORIGINS.includes(origin)) {
+            return callback(null, true)
+        }
+        return callback(new Error("Origen no permitido"))
+    }
+}))
+
+
+//Middleware custom trazabilidad
 app.use((req, res, next) =>{
     const timeString = new Date().toLocaleTimeString()
     console.log(`[${timeString}] ${req.method} ${req.url}`)
     next()
-})
-
-//Tambien se pueden crear tantos middelware como se quiera y pasrlo a un metodo concreto, se ejecutaran en el orden de que aparecen en el metodo. Ver el get de "/"
-const previousHomeMiddleware = (req, res, next) => {
-    console.log("Ejecutando el middleware previo a la ruta / ")
-    next()
-}
-
-app.get("/", previousHomeMiddleware, (req, res) => {
-    return res.send("Hello World")
 })
 
 app.get('/health', (req, res) => {
@@ -33,39 +37,58 @@ app.get('/health', (req, res) => {
   })
 })
 
+app.get("/jobs", (req, res) => {
+    const { text, title, level, technology, limit = DEFAULTS.LIMIT_PAGINATION, offset = DEFAULTS.OFFSET_PAGINATION } = req.query
 
-app.get("/get-jobs", (req, res) => {   
-    res.json(jobs)
+    let filteredJobs = jobs
+    if (text) {
+      const searchTerm = text.toLowerCase()
+      filteredJobs = filteredJobs.filter( job => {
+        return job.titulo.toLowerCase().includes(searchTerm) || job.descripcion.toLowerCase().includes(searchTerm)
+      })
+    }
+
+    if (technology) {
+      filteredJobs = filteredJobs.filter( job =>{
+        return job.data.technology.includes(technology)
+      })
+    }
+
+    const limitNumber = Number(limit)
+    const offsetNumber = Number(offset)
+
+    const paginatedJobs = filteredJobs.slice(offsetNumber, offsetNumber + limitNumber)
+
+    res.json({total: filteredJobs.length, limit: limitNumber, offset: offsetNumber, results: paginatedJobs.length, data: paginatedJobs})
 })
 
-app.get("/get-single-job/:id", (req, res) =>{
+
+app.get("/jobs/:id", (req, res) =>{
     const { id } = req.params
-    const idNumber = Number(id)
-    const jobFilter = jobs.filter((job) => {
-        return job.id === idNumber
-    })
-    
-    return res.json(jobFilter)
+
+    const job = jobs.find(job => {return job.id === id})
+
+    if(!job)
+        return res.status(404).json({ error: "Job not found"})
+
+    return res.json(job)
 })
 
-// Opcional -> /acd o /abcd
-app.get('/a{b}cd', (req, res) => {
-  return res.send('abcd o acd')
-})
+app.post("/jobs", (req, res) =>{
+    const {titulo, empresa, ubicacion, descripcion, data} = req.body
 
-// Comodín
-app.get('/bb*bb', (req, res) => {
-  return res.send('bb*bb')
-})
+    const newJob = {
+        id: crypto.randomUUID(),
+        titulo,
+        empresa,
+        ubicacion,
+        descripcion,
+        data
+    }
 
-// Rutas más largas que no sabes como terminan
-app.get('/file/*filename', (req, res) => {
-  return res.send('file/*')
-})
+    jobs.push(newJob)
 
-// Usar Regex
-app.get(/.*fly$/, (req, res) => {
-  return res.send('Terminando en fly')
+    return res.status(201).json(newJob)
 })
 
 app.listen(PORT, () => {
