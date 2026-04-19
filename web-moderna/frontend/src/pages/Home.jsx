@@ -25,7 +25,7 @@ export default function HomePage() {
                             <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
                             <path d="M21 21l-6 -6" />
                         </svg>
-                        <input type="text" placeholder="Buscar empleos por título, habilidad o empresa" name="search"/>
+                        <input type="search" placeholder="Buscar empleos por título, habilidad o empresa" name="search"/>
                         <button type="submit">Buscar</button>
                     </div>
                 </form>
