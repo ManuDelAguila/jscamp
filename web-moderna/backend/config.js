@@ -6,6 +6,6 @@ export const DEFAULTS = {
 
 export const ACCEPTED_ORIGINS = [
     "http://localhost:5173",
-    //"http://localhost:1234",
+    "http://localhost:1234",
     //Puede ser un lisatdo
 ]

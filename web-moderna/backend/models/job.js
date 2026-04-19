@@ -12,9 +12,9 @@ export class JobModel {
         }
 
         if (technology) {
-        filteredJobs = filteredJobs.filter( job =>{
-            return job.data.technology.includes(technology)
-        })
+            filteredJobs = filteredJobs.filter( job =>{
+                return job.data.technology.includes(technology)
+            })
         }
 
         const limitNumber = Number(limit)
