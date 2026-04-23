@@ -1,5 +1,6 @@
 import { Router } from "express";
 import OpenAI from "openai"
+import rateLimit from "express-rate-limit"
 import { JobModel } from "../models/job.js";
 import { AI_CONFIG } from "../config.js";
 
@@ -7,7 +8,17 @@ process.loadEnvFile()
 
 const customBaseURL = process.env.IA_BASE_URL;
 
+const aiRateLimit = rateLimit({
+    windowMs: 60 * 1000,
+    limit: 5,
+    message: { error: "Demasiadas solicitudes, por favor intenta de nuevo mas tarde."},
+    legacyHeaders: false,
+    standardHeaders: "draft-8"
+})
+
+
 export const aiRouter = Router()
+aiRouter.use(aiRateLimit)
 
 const openai = new OpenAI({    
      ...(customBaseURL && { baseURL: customBaseURL }),

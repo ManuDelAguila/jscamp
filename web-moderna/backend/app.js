@@ -7,6 +7,9 @@ import { DEFAULTS } from "./config.js"
 const PORT = process.env.PORT ?? DEFAULTS.PORT
 const app = express()
 
+// Eso es para el RateLimit para que las cabeceras las lea del proxy que hay antes, Nginx, Cloudflare... pq las del usuario no se puede confiar ya que son facilmente modificables
+app.set("trust proxy", 1)
+
 app.use(corsMiddleware())
 app.use(express.json())
 
