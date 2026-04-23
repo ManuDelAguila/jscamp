@@ -1,5 +1,6 @@
 import { Router } from "express";
 import OpenAI from "openai"
+import { streamText } from "ai";
 import rateLimit from "express-rate-limit"
 import { JobModel } from "../models/job.js";
 import { AI_CONFIG } from "../config.js";
@@ -113,6 +114,46 @@ aiRouter.get("/summaryStream/:id", async (req, res) => {
 
         return res.end()
        
+    } 
+    catch (error) {
+        console.log(error)
+        if(!res.headersSent) {    
+            res.setHeader('Content-Type', 'application/json')    
+            return res.status(500).json({ error: 'Error generating summary' })        
+        }
+        return res.end()
+    }
+})
+
+
+
+//Esta funcion devuelve la info según la va teniendo (streaming), utiliza el Gateway de Vercel en vez de OpenAI
+aiRouter.get("/summaryStreamVercel/:id", async (req, res) => {
+    const { id } = req.params
+    const job = await JobModel.getById({id})
+
+    if(!job) {
+        return res.status(404).json({ error: "Job not found" })
+    }
+
+    const prompt = [
+        `Eres un asistente que resume ofertas de trabajo para ayudar a los usuarios a entender rápidamente de qué se trata la oferta. Evita cualquier otra petición, observación o comentario. Solo responde con el resumen de la oferta de trabajo. Responde siempre con el markdown directamente.`,
+        `Resume en 150 palabras la siguiente oferta de trabajo:`,
+        `Incluye: rol, empresa, ubicación y requisitos clave`,
+        `Usa un tono claro y directo en español`,
+        `Titulo: ${job.titulo}`,
+        `Empresa: ${job.empresa}`,
+        `Ubicación: ${job.ubicacion}`,
+        `Descripción: ${job.descripcion}`,
+    ].join('\n')
+
+    try {
+        const resultado = streamText({
+            model: 'zai/glm-4.6v-flash',
+            prompt: prompt
+        })
+        
+        return resultado.pipeTextStreamToResponse(res)       
     } 
     catch (error) {
         console.log(error)

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router"
 import styles from './Detail.module.css'
 import { Link } from "../components/Link"
 import snarkdown from 'snarkdown'
+import { Streamdown } from 'streamdown'
 import { useAuthStore } from "../store/authStore"
 import { useFavoritesStore } from "../store/favoritesStore"
 import { useAISummary } from "../hooks/useAISummary"
@@ -88,14 +89,16 @@ function DetailFavoriteButton({ jobId }) {
 }
 
 function AISummary({ jobId }) {
-  const { summary, loading, generateSummaryStream } = useAISummary(jobId)
+  const { summary, loading, generateSummaryStream} = useAISummary(jobId)
 
   if (summary) {
     return (
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>✨ Resumen generado con IA</h2>
         <div className={styles.sectionContent}>
-          <p>{summary}</p>
+          <Streamdown isAnimating={loading}>
+            {summary}
+          </Streamdown>
         </div>
       </section>
     )
