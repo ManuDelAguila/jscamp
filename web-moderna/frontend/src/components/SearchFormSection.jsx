@@ -75,7 +75,7 @@ export function SearchFormSection({ initialText, onSearch, onTextFilter }) {
                       name={idText} 
                       id="empleos-search-input"
                       required
-                      type="text"
+                      type="search"
                       placeholder="Buscar trabajos, empresas o habilidades"
                       onChange={handleTextChange}
                       defaultValue={initialText}

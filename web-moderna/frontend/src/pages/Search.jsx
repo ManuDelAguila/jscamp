@@ -7,7 +7,8 @@ import { useSearchParams } from "react-router"
 
 const RESULTS_PER_PAGE = 4
 //const API_URL = "https://jscamp-api.vercel.app/api/jobs"
-const API_URL = "http://localhost:1234/jobs"
+//const API_URL = "http://localhost:1234/jobs"
+const API_URL = import.meta.env.VITE_API_URL
 
 const useFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -50,7 +51,7 @@ const useFilters = () => {
         
         const queryString = queryParams.toString()
      
-        const response = await fetch(`${API_URL}?${queryString}`)
+        const response = await fetch(`${API_URL}/jobs?${queryString}`)
         const json = await response.json()
 
         setJobs(json.data)

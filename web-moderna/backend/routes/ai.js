@@ -5,15 +5,17 @@ import { AI_CONFIG } from "../config.js";
 
 process.loadEnvFile()
 
+const customBaseURL = process.env.IA_BASE_URL;
+
 export const aiRouter = Router()
 
-const openai = new OpenAI({
+const openai = new OpenAI({    
+     ...(customBaseURL && { baseURL: customBaseURL }),
     apiKey: process.env.OPENAI_API_KEY
 })
 
 aiRouter.get("/summary/:id", async (req, res) => {
     const { id } = req.params
-    console.log("ID:", id)
     const job = await JobModel.getById({id})
 
     if(!job) {
@@ -41,10 +43,9 @@ aiRouter.get("/summary/:id", async (req, res) => {
             ],
             model: AI_CONFIG.MODEL_AI
         })
-        
-        const summary = completion.choices?.[0]?.messages?.content?.trim()
+        const summary = completion.choices?.[0]?.message?.content?.trim()
 
-        if (!sumary) {
+        if (!summary) {
             return res.status(502).json({ error: 'Not summary generated' })        
         }
 

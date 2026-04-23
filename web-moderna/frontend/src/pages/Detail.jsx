@@ -6,7 +6,8 @@ import snarkdown from 'snarkdown'
 import { useAuthStore } from "../store/authStore"
 import { useFavoritesStore } from "../store/favoritesStore"
 
-const API_URL = "https://jscamp-api.vercel.app/api/jobs"
+//const API_URL = "https://jscamp-api.vercel.app/api/jobs"
+const API_URL = import.meta.env.VITE_API_URL
 
 function JobSection ({ title, content }) {
   const html = snarkdown(content)
@@ -85,6 +86,55 @@ function DetailFavoriteButton ({ jobId }) {
   )
 }
 
+function AISummary({ jobId}) {
+  const [summary, setSummary] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const generateSummary = async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch(`${API_URL}/ai/summary/${jobId}`)
+      if(!response.ok) {
+        throw new Error("Error fetching summary")
+      }
+      const data = await response.json()
+      setSummary(data.summary)
+    }
+    catch(error) {
+      console.log(error)
+      setError("Error al generar el resumen")
+    }
+    finally {
+      setLoading(false)
+    }
+  }
+
+  if(summary){
+    return (
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>✨ Resumen generado con IA</h2>
+        <div className={styles.sectionContent}>
+          <p>{summary}</p>
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <button 
+      onClick={generateSummary}
+      disabled={loading}
+      className={styles.applyButton}
+      >
+
+        {loading ? "Generando resumen..." : "✨ Generar resumen con IA"}
+
+    </button>
+  )
+}
+
 export default function JobDetail() {
     const { jobId } = useParams()
     const navigate = useNavigate()
@@ -95,7 +145,7 @@ export default function JobDetail() {
 
     useEffect(() => {
         setLoading(true)
-        fetch (`${API_URL}/${jobId}`)
+        fetch (`${API_URL}/jobs/${jobId}`)
             .then(response => {
                 if (!response.ok) throw new Error("Trabajo no encontrado")
                 return response.json()
@@ -137,6 +187,7 @@ export default function JobDetail() {
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1rem' }}>
             <DetailPageBreadCrumb job={job} />
             <DetailPageHeader job={job} />
+            <AISummary jobId={(job.id)} />
 
             <JobSection title="Descripción del puesto" content={job.content.description} />
             <JobSection title="Responsabilidades" content={job.content.responsibilities} />
