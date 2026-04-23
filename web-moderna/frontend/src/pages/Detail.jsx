@@ -5,11 +5,12 @@ import { Link } from "../components/Link"
 import snarkdown from 'snarkdown'
 import { useAuthStore } from "../store/authStore"
 import { useFavoritesStore } from "../store/favoritesStore"
+import { useAISummary } from "../hooks/useAISummary"
 
 //const API_URL = "https://jscamp-api.vercel.app/api/jobs"
 const API_URL = import.meta.env.VITE_API_URL
 
-function JobSection ({ title, content }) {
+function JobSection({ title, content }) {
   const html = snarkdown(content)
 
   return (
@@ -29,11 +30,11 @@ function JobSection ({ title, content }) {
   )
 }
 
-function DetailPageBreadCrumb ({ job }) {
+function DetailPageBreadCrumb({ job }) {
   return (
     <div className={styles.container}>
       <nav className={styles.breadcrumb}>
-        <Link 
+        <Link
           href="/search"
           className={styles.breadcrumbButton}
         >
@@ -46,7 +47,7 @@ function DetailPageBreadCrumb ({ job }) {
   )
 }
 
-function DetailPageHeader ({ job }) {
+function DetailPageHeader({ job }) {
   return (
     <>
       <header className={styles.header}>
@@ -64,16 +65,16 @@ function DetailPageHeader ({ job }) {
   )
 }
 
-function DetailApplyButton () {
-    const { isLoggedIn } = useAuthStore()
-    return (
-      <button disabled={!isLoggedIn} className={styles.applyButton}>
-          {isLoggedIn ? "Aplicar ahora" : "Inicia sesión para aplicar"}
-      </button>
-    )
+function DetailApplyButton() {
+  const { isLoggedIn } = useAuthStore()
+  return (
+    <button disabled={!isLoggedIn} className={styles.applyButton}>
+      {isLoggedIn ? "Aplicar ahora" : "Inicia sesión para aplicar"}
+    </button>
+  )
 }
 
-function DetailFavoriteButton ({ jobId }) {
+function DetailFavoriteButton({ jobId }) {
   const { isFavorite, toggleFavorite } = useFavoritesStore()
 
   return (
@@ -86,63 +87,10 @@ function DetailFavoriteButton ({ jobId }) {
   )
 }
 
-function AISummary({ jobId}) {
-  const [summary, setSummary] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const generateSummaryBlock = async () => {
-    setLoading(true)
-    setError(null)
+function AISummary({ jobId }) {
+  const { summary, loading, generateSummaryStream } = useAISummary(jobId)
 
-    try {
-      const response = await fetch(`${API_URL}/ai/summaryJson/${jobId}`)
-      if(!response.ok) {
-        throw new Error("Error fetching summary")
-      }
-      const data = await response.json()
-      setSummary(data.summary)
-    }
-    catch(error) {
-      console.log(error)
-      setError("Error al generar el resumen")
-    }
-    finally {
-      setLoading(false)
-    }
-  }
-
-   const generateSummaryStream = async () => {
-    setLoading(true)
-    setError(null)
-    setSummary("")
-
-    try {
-      const response = await fetch(`${API_URL}/ai/summaryStream/${jobId}`)
-      if(!response.ok) {
-        throw new Error("Error fetching summary")
-      }
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-      
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        const chunkText = decoder.decode(value, { stream: true })
-        setSummary(prev => prev + chunkText)
-      }
-      
-    }
-    catch(error) {
-      console.log(error)
-      setError("Error al generar el resumen")
-    }
-    finally {
-      setLoading(false)
-    }
-  }
-
-  if(summary){
+  if (summary) {
     return (
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>✨ Resumen generado con IA</h2>
@@ -154,76 +102,76 @@ function AISummary({ jobId}) {
   }
 
   return (
-    <button 
+    <button
       onClick={generateSummaryStream}
       disabled={loading}
       className={styles.applyButton}
-      >
+    >
 
-        {loading ? "Generando resumen..." : "✨ Generar resumen con IA"}
+      {loading ? "Generando resumen..." : "✨ Generar resumen con IA"}
 
     </button>
   )
 }
 
 export default function JobDetail() {
-    const { jobId } = useParams()
-    const navigate = useNavigate()
+  const { jobId } = useParams()
+  const navigate = useNavigate()
 
-    const [job, setJob] = useState(null)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+  const [job, setJob] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-    useEffect(() => {
-        setLoading(true)
-        fetch (`${API_URL}/jobs/${jobId}`)
-            .then(response => {
-                if (!response.ok) throw new Error("Trabajo no encontrado")
-                return response.json()
-            })
-            .then(json => setJob(json))
-            .catch(error => setError(error.message))
-            .finally(() => setLoading(false))
-                
-
-    }, [jobId])
+  useEffect(() => {
+    setLoading(true)
+    fetch(`${API_URL}/jobs/${jobId}`)
+      .then(response => {
+        if (!response.ok) throw new Error("Trabajo no encontrado")
+        return response.json()
+      })
+      .then(json => setJob(json))
+      .catch(error => setError(error.message))
+      .finally(() => setLoading(false))
 
 
-    if (loading) {
-        return <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1rem' }}>
-        <div className={styles.loading}>
-            <p className={styles.loadingText}>Cargando...</p>
-        </div>
-        </div>
-    }
+  }, [jobId])
 
-    if (error || !job) {
-        return (
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1rem' }}>
-            <div className={styles.error}>
-            <h2 className={styles.errorTitle}>
-                Oferta no encontrada
-            </h2>
-            <button
-                onClick={() => navigate('/')}
-                className={styles.errorButton}
-            >
-                Volver al inicio
-            </button>
-            </div>
-        </div>
-        )
-    }
+
+  if (loading) {
+    return <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1rem' }}>
+      <div className={styles.loading}>
+        <p className={styles.loadingText}>Cargando...</p>
+      </div>
+    </div>
+  }
+
+  if (error || !job) {
     return (
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1rem' }}>
-            <DetailPageBreadCrumb job={job} />
-            <DetailPageHeader job={job} />
-            <AISummary jobId={(job.id)} />
-
-            <JobSection title="Descripción del puesto" content={job.content.description} />
-            <JobSection title="Responsabilidades" content={job.content.responsibilities} />
-            <JobSection title="Requisitios" content={job.content.requirements} />
-            <JobSection title="Acerca de la empresa" content={job.content.about} />
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1rem' }}>
+        <div className={styles.error}>
+          <h2 className={styles.errorTitle}>
+            Oferta no encontrada
+          </h2>
+          <button
+            onClick={() => navigate('/')}
+            className={styles.errorButton}
+          >
+            Volver al inicio
+          </button>
         </div>
+      </div>
     )
+  }
+  return (
+    <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1rem' }}>
+      <DetailPageBreadCrumb job={job} />
+      <DetailPageHeader job={job} />
+      <AISummary jobId={(job.id)} />
+
+      <JobSection title="Descripción del puesto" content={job.content.description} />
+      <JobSection title="Responsabilidades" content={job.content.responsibilities} />
+      <JobSection title="Requisitios" content={job.content.requirements} />
+      <JobSection title="Acerca de la empresa" content={job.content.about} />
+    </div>
+  )
 }
