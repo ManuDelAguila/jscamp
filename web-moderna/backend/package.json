@@ -14,10 +14,14 @@
   "type": "module",
   "dependencies": {
     "ai": "6.0.168",
+    "better-sqlite3": "12.9.0",
     "cors": "2.8.6",
     "express": "5.2.1",
     "express-rate-limit": "8.4.0",
     "openai": "6.34.0",
     "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "7.6.13"
   }
 }
